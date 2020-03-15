@@ -1,22 +1,22 @@
-from config import tasks_url
+from config import tasks_url, users_url
 import requests
+from time import sleep
 
-def get_tasks_list():
-	response = requests.get(tasks_url)
-	if (response.status_code != 200):
-		error_log = 'Failed to access ' + tasks_url 
-		error_log += ' Server response status code: ' + str(response.status_code)
-		print(error_log)
-		get_tasks_list()
-	task_list = response.json()
-	return task_list
 
-def get_users_list():
-	response = requests.get(users_url)
-	if (response.status_code != 200):
-		error_log = 'Failed to access ' + users_url
-		error_log +=' Server response status code: ' +str(response.status_code)
-		print(error_log)
-		get_users_list()
-	users_list = response.json()
-	return users_list
+#Solved with ru.stackoverflow.com/questions/816815/
+def get_data_from_api(api_url):
+	while True:
+		try:
+			response = requests.get(api_url)
+			if (response.status_code != 200):
+				error_log = 'Failed to access ' + api_url
+				error_log +=' Server response status code: ' + str(response.status_code)
+				print(error_log)
+				continue
+
+			return response.json()
+
+		except requests.ConnectionError:
+			print('ConnectionError. Check your connection to internet')
+			sleep(5)
+
