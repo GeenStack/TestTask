@@ -25,11 +25,26 @@ def users_list_created(users_list_returned_by_api):
 	users_list = []
 	for i in users_list_returned_by_api:
 		new_user = {}
-		new_user.update({"user_id":i["id"], "name":i["name"], "email":i["email"], 
+		new_user.update({"userId":i["id"], "name":i["name"], "email":i["email"], 
 						"completed_tasks":[], "lost_task":[]})
 		
 		users_list.append(new_user)
 	return users_list
+
+
+def parsing_tasks_list_and_add_to_users(tasks_list, users_list):
+	for task in tasks_list:
+		#Now need find user
+		for user in users_list:
+			if (task["userId"] == user["userId"]):
+				if(task["completed"]):
+					user["completed_tasks"].append(task["title"])
+				else:
+					user["lost_task"].append(task["title"])
+				break
+
+
+
 
 '''
 def tasks_list_created(tasks_list_returned_by_api):
@@ -38,6 +53,7 @@ def tasks_list_created(tasks_list_returned_by_api):
 '''
 
 test_users_list = users_list_created(get_data_from_api(users_url))
+parsing_tasks_list_and_add_to_users(get_data_from_api(tasks_url), test_users_list)
 for i in test_users_list:
 	print(i)
 	print('\n\n')
