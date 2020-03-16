@@ -5,7 +5,6 @@ import requests
 from config import tasks_url, users_url
 
 
-
 def get_json(api_url):
     """Функция возвращает данные от API в виде списка"""
     while True:
