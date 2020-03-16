@@ -1,7 +1,10 @@
+#coding: utf-8
+
 from config import tasks_url, users_url
 import requests
 from time import sleep
 from time import gmtime, strftime
+import os
 
 
 #Solved with ru.stackoverflow.com/questions/816815/
@@ -35,7 +38,6 @@ def users_list_created(users_list_returned_by_api):
 
 def parsing_tasks_list_and_add_to_users(tasks_list, users_list):
     for task in tasks_list:
-        #Now need find user
         for user in users_list:
             if (task["userId"] == user["userId"]):
                 if(task["completed"]):
@@ -43,20 +45,6 @@ def parsing_tasks_list_and_add_to_users(tasks_list, users_list):
                 else:
                     user["lost_task"].append(task["title"])
                 break
-
-
-
-
-def print_user(user):#THIS FUNCTION ONLY FOR DEBUG
-    print("ID "+str(user["userId"]))
-    print("name "+str(user["name"]))
-    print("email "+str(user["email"]))
-    print("company "+str(user["company"]))
-    print("COMPLETED TASKS LIST")
-    print(user["completed_tasks"])
-    print("LOST TASKS LIST")
-    print(user['lost_task'])
-    print('\n\n')
 
 
 def format_tasks_report(preview, task_list):
@@ -75,25 +63,32 @@ def report_preparing(user):
     report += format_tasks_report('completed_tasks:\n',user['completed_tasks'])
     report += format_tasks_report('\nLost_tasks:\n', user['lost_task'])
     print(report)
-    return {"report_content":report, "report_date":report_creating_date}
+    return report
     
 def write_report_to_file(user, report):
-    pass
+    try:
+        file_path = "tasks/{}.txt".format(user["name"])
+        if(os.path.exists(file_path)):
+            f = open(file_path, 'r')
+            data = f.read()
+            f.close()
+            data = data.split('\n')
+            report_date = data[0][-16::]
+            report_date = report_date.replace(' ','T')
+            report_date = report_date.replace('.','-')
+            os.system('mv \"{}\" tasks/\"{}_{}.txt\"'.format(file_path,user["name"], report_date)) 
+
+        f = open(file_path, 'w')
+        f.write(report)
+        f.close()
+    except (IOError, OSError) as e:
+        print("Вызвана ошибка ")
+        print(e)
+
 
 
 
 test_users_list = users_list_created(get_data_from_api(users_url))
 parsing_tasks_list_and_add_to_users(get_data_from_api(tasks_url), test_users_list)
 for i in test_users_list:
-    report_preparing(i)
-#TO DO
-#Describe users
-#  1. Form users_list, use some data from requests(users_url)
-#  2. Put tasks to users 
-
-#users model as JSON: {users:[{user1},{user2},{userN}]}?
-#Maybe use Class?
-#From users need data name, id and email
-#From tasks need useerId, completed, title
-#Is there really a need for additional processing 
-#of the task list that the API returns to me?
+    write_report_to_file(i, report_preparing(i))
