@@ -134,17 +134,13 @@ def write_report_to_file(user, report):
 
 
 def main():
-    if(os.path.exists("tasks")):
-        print("Директория tasks уже существует")
-    else:
+    if(os.path.exists('/tasks') == False):
         os.system("mkdir tasks")
-
     user_list = create_user_list(get_json(users_url))
     add_tasks_to_users(get_json(tasks_url), user_list)
     for i in user_list:
         write_report_to_file(i, report_preparing(i))
 
-    print("Отчеты созданы в tasks/")
 
 if __name__ == "__main__":
     main()
